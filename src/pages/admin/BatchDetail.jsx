@@ -10,7 +10,8 @@ import {
   DollarSign,
   TrendingUp,
   User,
-  BarChart3
+  BarChart3,
+  UserMinus
 } from 'lucide-react'
 import {
   Card,
@@ -35,7 +36,7 @@ import {
   LineChart,
   Line
 } from 'recharts'
-import { getBatch, getStudents, getTests, getAttendance, getFeePayments } from '../../lib/supabase'
+import { getBatch, getStudents, getTests, getAttendance, getFeePayments, updateStudent } from '../../lib/supabase'
 import { useOrganization } from '../../context/OrganizationContext'
 
 const tabsList = [
@@ -226,7 +227,13 @@ function BatchDetail() {
       {/* Tab Content */}
       <div className="mt-6">
         {activeTab === 'students' && (
-          <StudentsTab students={students} batchId={id} navigate={navigate} />
+          <StudentsTab 
+            students={students} 
+            batchId={id} 
+            navigate={navigate} 
+            organizationId={currentOrganization?.id}
+            onStudentRemoved={loadBatchData}
+          />
         )}
         {activeTab === 'performance' && (
           <PerformanceTab students={students} topicData={topicPerformance} trendData={testTrends} />
@@ -242,7 +249,30 @@ function BatchDetail() {
   )
 }
 
-function StudentsTab({ students, batchId, navigate }) {
+function StudentsTab({ students, batchId, navigate, organizationId, onStudentRemoved }) {
+  const [removing, setRemoving] = useState(null)
+
+  const handleRemoveStudent = async (student) => {
+    const confirmed = window.confirm(
+      `Remove "${student.full_name}" from this batch? The student will not be deleted, just unassigned from this batch.`
+    )
+    
+    if (!confirmed) return
+    
+    setRemoving(student.id)
+    try {
+      const { error } = await updateStudent(organizationId, student.id, { batch_id: null })
+      if (error) throw error
+      
+      alert('Student removed from batch successfully!')
+      onStudentRemoved()
+    } catch (error) {
+      console.error('Error removing student from batch:', error)
+      alert('Error removing student from batch')
+    }
+    setRemoving(null)
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -262,6 +292,7 @@ function StudentsTab({ students, batchId, navigate }) {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fee Status</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Attendance</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Score</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -291,6 +322,17 @@ function StudentsTab({ students, batchId, navigate }) {
                     <Badge variant={student.avg_score >= 75 ? 'success' : student.avg_score >= 50 ? 'warning' : 'danger'} size="sm">
                       {student.avg_score}%
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => handleRemoveStudent(student)}
+                      loading={removing === student.id}
+                      title="Remove from batch"
+                    >
+                      <UserMinus className="w-4 h-4 text-red-500" />
+                    </Button>
                   </td>
                 </tr>
               ))}

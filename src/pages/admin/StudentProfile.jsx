@@ -11,7 +11,8 @@ import {
   DollarSign,
   TrendingUp,
   User,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react'
 import {
   Card,
@@ -35,7 +36,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts'
-import { getStudent, getFeePayments, getAttendance, updateStudent, getBatches } from '../../lib/supabase'
+import { getStudent, getFeePayments, getAttendance, updateStudent, getBatches, deleteStudent } from '../../lib/supabase'
 import { useOrganization } from '../../context/OrganizationContext'
 
 const tabsList = [
@@ -60,6 +61,7 @@ function StudentProfile() {
   const [editSaving, setEditSaving] = useState(false)
   const [editData, setEditData] = useState(null)
   const [batches, setBatches] = useState([])
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (currentOrganization?.id) {
@@ -135,6 +137,27 @@ function StudentProfile() {
 
   const feeStatus = student.due_amount > 2000 ? 'overdue' : student.due_amount > 0 ? 'current' : 'paid'
 
+  const handleDeleteStudent = async () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete "${student.full_name}"? This will also delete all their fee payments, attendance records, and test scores. This action cannot be undone.`
+    )
+    
+    if (!confirmed) return
+    
+    setDeleting(true)
+    try {
+      const { error } = await deleteStudent(currentOrganization.id, student.id)
+      if (error) throw error
+      
+      alert('Student deleted successfully!')
+      navigate('/students')
+    } catch (error) {
+      console.error('Error deleting student:', error)
+      alert('Error deleting student. Please try again.')
+    }
+    setDeleting(false)
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -162,34 +185,44 @@ function StudentProfile() {
             </div>
           </div>
         </div>
-        <Button variant="secondary" onClick={async () => {
-          // load batches before opening edit modal
-          if (!currentOrganization?.id) return
-          try {
-            const b = await getBatches(currentOrganization.id)
-            setBatches(b || [])
-          } catch (err) {
-            console.error('Failed to load batches', err)
-          }
-          setEditData({
-            full_name: student.full_name || '',
-            dob: student.dob || '',
-            gender: student.gender || '',
-            contact: student.contact || '',
-            parent_name: student.parent_name || '',
-            parent_contact: student.parent_contact || '',
-            email: student.email || '',
-            address: student.address || '',
-            batch_id: student.batch_id || student.batches?.id || '',
-            monthly_fee: student.monthly_fee || student.batches?.monthly_fee || '',
-            joining_date: student.joining_date || '' ,
-            due_amount: student.due_amount || 0
-          })
-          setIsEditOpen(true)
-        }}>
-          <Edit className="w-4 h-4" />
-          Edit
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="danger" 
+            onClick={handleDeleteStudent}
+            loading={deleting}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </Button>
+          <Button variant="secondary" onClick={async () => {
+            // load batches before opening edit modal
+            if (!currentOrganization?.id) return
+            try {
+              const b = await getBatches(currentOrganization.id)
+              setBatches(b || [])
+            } catch (err) {
+              console.error('Failed to load batches', err)
+            }
+            setEditData({
+              full_name: student.full_name || '',
+              dob: student.dob || '',
+              gender: student.gender || '',
+              contact: student.contact || '',
+              parent_name: student.parent_name || '',
+              parent_contact: student.parent_contact || '',
+              email: student.email || '',
+              address: student.address || '',
+              batch_id: student.batch_id || student.batches?.id || '',
+              monthly_fee: student.monthly_fee || student.batches?.monthly_fee || '',
+              joining_date: student.joining_date || '' ,
+              due_amount: student.due_amount || 0
+            })
+            setIsEditOpen(true)
+          }}>
+            <Edit className="w-4 h-4" />
+            Edit
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
