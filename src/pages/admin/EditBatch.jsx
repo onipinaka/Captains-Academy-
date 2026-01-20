@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, Button, Input, Select, Textarea, PageLoader } from '../../components/ui'
-import { getBatch, updateBatch } from '../../lib/supabase'
+import { getBatch, updateBatch, deleteBatch } from '../../lib/supabase'
 import { useOrganization } from '../../context/OrganizationContext'
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -13,6 +13,7 @@ function EditBatch() {
   const { currentOrganization } = useOrganization()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     standard: '',
@@ -93,6 +94,27 @@ function EditBatch() {
     }
 
     setSaving(false)
+  }
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the batch "${formData.name}"? This action cannot be undone. Students in this batch will need to be reassigned.`
+    )
+    
+    if (!confirmed) return
+    
+    setDeleting(true)
+    try {
+      const { error } = await deleteBatch(currentOrganization.id, id)
+      if (error) throw error
+      
+      alert('Batch deleted successfully!')
+      navigate('/batches')
+    } catch (error) {
+      console.error('Error deleting batch:', error)
+      alert('Error deleting batch. Make sure no students are assigned to this batch.')
+    }
+    setDeleting(false)
   }
 
   if (loading || !currentOrganization) return <PageLoader />
@@ -236,14 +258,25 @@ function EditBatch() {
         </Card>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 mt-6">
-          <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
-            Cancel
+        <div className="flex items-center justify-between mt-6">
+          <Button 
+            type="button" 
+            variant="danger" 
+            onClick={handleDelete}
+            loading={deleting}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete Batch
           </Button>
-          <Button type="submit" loading={saving}>
-            <Save className="w-4 h-4" />
-            Update Batch
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={saving}>
+              <Save className="w-4 h-4" />
+              Update Batch
+            </Button>
+          </div>
         </div>
       </form>
     </div>

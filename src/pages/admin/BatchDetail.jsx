@@ -226,7 +226,7 @@ function BatchDetail() {
       {/* Tab Content */}
       <div className="mt-6">
         {activeTab === 'students' && (
-          <StudentsTab students={students} />
+          <StudentsTab students={students} batchId={id} navigate={navigate} />
         )}
         {activeTab === 'performance' && (
           <PerformanceTab students={students} topicData={topicPerformance} trendData={testTrends} />
@@ -242,12 +242,12 @@ function BatchDetail() {
   )
 }
 
-function StudentsTab({ students }) {
+function StudentsTab({ students, batchId, navigate }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Students in Batch</CardTitle>
-        <Button size="sm" onClick={() => navigate(`/students/add?batch=${id}`)}>
+        <Button size="sm" onClick={() => navigate(`/students/add?batch=${batchId}`)}>
           <Users className="w-4 h-4" />
           Add Student
         </Button>
