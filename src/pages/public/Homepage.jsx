@@ -4,7 +4,7 @@ import emailjs from '@emailjs/browser'
 import { 
   GraduationCap, Users, Award, Clock, MapPin, Phone, Mail, 
   ChevronRight, Star, BookOpen, CheckCircle, ArrowRight,
-  Facebook, Instagram, Youtube, Twitter
+  Facebook, Instagram, Youtube, Twitter, Menu, X
 } from 'lucide-react'
 
 const stats = [
@@ -59,6 +59,7 @@ function Homepage() {
     name: '', phone: '', email: '', course: '', message: ''
   })
   const [sending, setSending] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // EmailJS Configuration - Replace with your actual credentials from https://www.emailjs.com/
   const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID'    // e.g., 'service_abc123'
@@ -98,6 +99,7 @@ function Homepage() {
               </div>
               <span className="text-xl font-bold text-gray-800">Captains Academy</span>
             </div>
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
               <a href="#about" className="text-gray-600 hover:text-blue-600">About</a>
               <a href="#timings" className="text-gray-600 hover:text-blue-600">Courses</a>
@@ -111,8 +113,68 @@ function Homepage() {
                 Admin Login
               </Link>
             </div>
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6 text-gray-600" />
+              ) : (
+                <Menu className="w-6 h-6 text-gray-600" />
+              )}
+            </button>
           </div>
         </div>
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
+            <div className="px-4 py-4 space-y-3">
+              <a 
+                href="#about" 
+                className="block py-2 text-gray-600 hover:text-blue-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </a>
+              <a 
+                href="#timings" 
+                className="block py-2 text-gray-600 hover:text-blue-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Courses
+              </a>
+              <a 
+                href="#results" 
+                className="block py-2 text-gray-600 hover:text-blue-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Results
+              </a>
+              <a 
+                href="#timings" 
+                className="block py-2 text-gray-600 hover:text-blue-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Timings
+              </a>
+              <a 
+                href="#contact" 
+                className="block py-2 text-gray-600 hover:text-blue-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+              <Link 
+                to="/login" 
+                className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Admin Login
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
