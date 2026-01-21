@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react'
-import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import emailjs from '@emailjs/browser'
 import { 
@@ -90,54 +89,6 @@ function Homepage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* SEO Meta Tags */}
-      <Helmet>
-        <title>Captains Academy – Comprehensive Coaching for Classes 2 to 11 | Gormi, Bhind</title>
-        <meta 
-          name="description" 
-          content="Captains Academy provides expert coaching for Classes 2-11 and competitive exams in Gormi, Bhind. Regular tests, PTMs, performance tracking, and experienced faculty. Enroll now!" 
-        />
-        <meta 
-          name="keywords" 
-          content="Captains Academy, coaching classes Gormi, Bhind coaching center, classes 2 to 11 tuition, competitive exam preparation, JEE coaching, NEET coaching, school tuition" 
-        />
-        <link rel="canonical" href="https://captainsacademy.in/" />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content="Captains Academy – Learning to Success" />
-        <meta property="og:description" content="Comprehensive coaching for Classes 2-11 and competitive exams in Gormi, Bhind." />
-        <meta property="og:image" content="https://captainsacademy.in/banner.png" />
-        <meta property="og:url" content="https://captainsacademy.in/" />
-        <meta property="og:type" content="website" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Captains Academy – Learning to Success" />
-        <meta name="twitter:description" content="Expert coaching for Classes 2-11 in Gormi, Bhind with regular tests and PTMs." />
-        <meta name="twitter:image" content="https://captainsacademy.in/banner.png" />
-        
-        {/* Local Business Schema */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "EducationalOrganization",
-            "name": "Captains Academy",
-            "description": "Comprehensive coaching for Classes 2-11 and competitive exam preparation",
-            "url": "https://captainsacademy.in",
-            "telephone": "+91-73546-20062",
-            "email": "captainsacademybhind@gmail.com",
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": "Porsa Road",
-              "addressLocality": "Gormi",
-              "addressRegion": "Bhind, Madhya Pradesh",
-              "addressCountry": "IN"
-            },
-            "sameAs": []
-          })}
-        </script>
-      </Helmet>
-      
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
         <div className="w-full px-4 sm:px-6 lg:px-8">
