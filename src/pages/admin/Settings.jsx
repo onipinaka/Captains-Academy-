@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
-import { User, Building, IndianRupee, Tag, Bell, Lock, Save, Trash2, Plus, Edit2 } from 'lucide-react'
+import { User, Building, IndianRupee, Tag, Bell, Lock, Save, Trash2, Plus, Edit2, Globe, ExternalLink } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, Button, Input, Select, Textarea, Badge, PageLoader } from '../../components/ui'
 import { useOrganization } from '../../context/OrganizationContext'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
+import { Link } from 'react-router-dom'
+
+// Owner email for content management access
+const OWNER_EMAIL = 'admingormi@gmail.com'
 
 const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -170,6 +174,25 @@ function Settings() {
           </button>
         ))}
       </div>
+
+      {/* Website Content Link - Owner Only */}
+      {user?.email === OWNER_EMAIL && (
+        <Link
+          to="/settings/content"
+          className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl hover:shadow-md transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Globe className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-800">Website Content</p>
+              <p className="text-sm text-gray-500">Edit homepage hero, stats, and contact info</p>
+            </div>
+          </div>
+          <ExternalLink className="w-5 h-5 text-gray-400" />
+        </Link>
+      )}
 
       {/* Profile Tab */}
       {activeTab === 'profile' && (

@@ -43,6 +43,7 @@ import BatchPerformance from './pages/admin/BatchPerformance'
 import Expenses from './pages/admin/Expenses'
 import AddExpense from './pages/admin/AddExpense'
 import Settings from './pages/admin/Settings'
+import HomepageContent from './pages/admin/HomepageContent'
 
 function App() {
   return (
@@ -109,6 +110,7 @@ function App() {
               
               {/* Settings */}
               <Route path="settings" element={<Settings />} />
+              <Route path="settings/content" element={<HomepageContent />} />
             </Route>
 
             {/* Catch all - redirect to home */}

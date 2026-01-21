@@ -1,18 +1,44 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import emailjs from '@emailjs/browser'
+import { supabase } from '../../lib/supabase'
 import { 
   GraduationCap, Users, Award, Clock, MapPin, Phone, Mail, 
   ChevronRight, Star, BookOpen, CheckCircle, ArrowRight,
   Facebook, Instagram, Youtube, Twitter, Menu, X
 } from 'lucide-react'
 
-const stats = [
-  { label: 'Students Enrolled', value: '500+', icon: Users },
-  { label: 'Success Rate', value: '95%', icon: Award },
-  { label: 'Years Experience', value: '3+', icon: Clock },
-  { label: 'Expert Faculty', value: '5+', icon: GraduationCap },
+// Default fallback content (used if database fetch fails)
+const defaultStats = [
+  { label: 'Students Enrolled', value: '500+', icon: 'Users' },
+  { label: 'Success Rate', value: '95%', icon: 'Award' },
+  { label: 'Years Experience', value: '3+', icon: 'Clock' },
+  { label: 'Expert Faculty', value: '5+', icon: 'GraduationCap' },
 ]
+
+const defaultHero = {
+  title: 'Excel in Your',
+  highlightedWord: 'Academics',
+  titleSuffix: 'with Expert Guidance',
+  subtitle: 'Join the leading coaching center with 3+ years of excellence. We provide personalized coaching for Class 3-12 and competitive exams like Army, Airforce, Navy, Police, Bank, SSC, and more.',
+  bannerImage: '/banner.png'
+}
+
+const defaultAbout = {
+  title: 'Why Choose Us?',
+  subtitle: 'We provide the best learning environment with experienced faculty and proven results'
+}
+
+const defaultContact = {
+  address: 'Captains Academy Gormi, Porsa Road, Gormi, Bhind',
+  phone: '+91 73546 20062',
+  email: 'captainsacademybhind@gmail.com'
+}
+
+// Icon mapping for dynamic stats
+const iconMap = {
+  Users, Award, Clock, GraduationCap
+}
 
 const features = [
   { title: 'Expert Faculty', description: 'Learn from experienced teachers with proven track records', icon: GraduationCap },
@@ -60,6 +86,49 @@ function Homepage() {
   })
   const [sending, setSending] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Dynamic content state with defaults
+  const [hero, setHero] = useState(defaultHero)
+  const [stats, setStats] = useState(defaultStats)
+  const [about, setAbout] = useState(defaultAbout)
+  const [contact, setContact] = useState(defaultContact)
+
+  // Fetch dynamic content from Supabase
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('homepage_content')
+          .select('section, content')
+
+        if (error) {
+          console.log('Homepage content table not found, using defaults')
+          return
+        }
+
+        data?.forEach(item => {
+          switch (item.section) {
+            case 'hero':
+              setHero(prev => ({ ...prev, ...item.content }))
+              break
+            case 'stats':
+              setStats(item.content)
+              break
+            case 'about':
+              setAbout(prev => ({ ...prev, ...item.content }))
+              break
+            case 'contact':
+              setContact(prev => ({ ...prev, ...item.content }))
+              break
+          }
+        })
+      } catch (err) {
+        console.log('Using default homepage content')
+      }
+    }
+
+    fetchContent()
+  }, [])
 
   // EmailJS Configuration - Replace with your actual credentials from https://www.emailjs.com/
   const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID'    // e.g., 'service_abc123'
@@ -183,11 +252,10 @@ function Homepage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight">
-                Excel in Your <span className="text-blue-600">Academics</span> with Expert Guidance
+                {hero.title} <span className="text-blue-600">{hero.highlightedWord}</span> {hero.titleSuffix}
               </h1>
               <p className="mt-6 text-lg text-gray-600 leading-relaxed">
-                Join the leading coaching center with 3+ years of excellence. 
-                We provide personalized coaching for Class 3-12 and competitive exams like Army, Airforce, Navy, Police, Bank, SSC, and more.
+                {hero.subtitle}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <a 
@@ -209,18 +277,21 @@ function Homepage() {
               <div className="absolute -bottom-8 -right-8 w-64 h-64 bg-purple-200 rounded-full opacity-30 blur-3xl"></div>
               <div className="relative bg-white rounded-2xl shadow-xl p-8">
                 <img 
-                  src="/banner.png" 
+                  src={hero.bannerImage} 
                   alt="Students studying"
                   className="w-full h-64 object-cover rounded-xl"
                 />
                 <div className="mt-6 grid grid-cols-2 gap-4">
-                  {stats.map((stat) => (
-                    <div key={stat.label} className="text-center p-4 bg-gray-50 rounded-xl">
-                      <stat.icon className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
-                      <p className="text-sm text-gray-500">{stat.label}</p>
-                    </div>
-                  ))}
+                  {stats.map((stat) => {
+                    const IconComponent = iconMap[stat.icon] || Users
+                    return (
+                      <div key={stat.label} className="text-center p-4 bg-gray-50 rounded-xl">
+                        <IconComponent className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                        <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
+                        <p className="text-sm text-gray-500">{stat.label}</p>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -232,9 +303,9 @@ function Homepage() {
       <section id="about" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Why Choose Us?</h2>
+            <h2 className="text-3xl font-bold text-gray-900">{about.title}</h2>
             <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-              We provide the best learning environment with experienced faculty and proven results
+              {about.subtitle}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -392,7 +463,7 @@ function Homepage() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800">Address</p>
-                    <p className="text-gray-600">Captains Academy Gormi, Porsa Rooad, Gormi, Bhind</p>
+                    <p className="text-gray-600">{contact.address}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -401,7 +472,7 @@ function Homepage() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800">Phone</p>
-                    <p className="text-gray-600">+91 73546 20062</p>
+                    <p className="text-gray-600">{contact.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -410,7 +481,7 @@ function Homepage() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800">Email</p>
-                    <p className="text-gray-600">captainsacademybhind@gmail.com</p>
+                    <p className="text-gray-600">{contact.email}</p>
                   </div>
                 </div>
               </div>
