@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
-import { Save, Globe, BarChart3, Info, Phone, Image, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Save, Globe, BarChart3, Info, Phone, Image, AlertCircle, Upload, Trash2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, Button, Input, Textarea, PageLoader } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
 
 // Owner email - only this user can access this page
 const OWNER_EMAIL = 'admingormi@gmail.com'
+const STORAGE_BUCKET = 'homepage-images'
 
 const tabs = [
   { id: 'hero', label: 'Hero Section', icon: Globe },
@@ -19,7 +20,9 @@ function HomepageContent() {
   const [activeTab, setActiveTab] = useState('hero')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(null)
+  const fileInputRef = useRef(null)
 
   // Content state
   const [hero, setHero] = useState({
@@ -115,6 +118,77 @@ function HomepageContent() {
     }
   }
 
+  // Extract filename from Supabase Storage URL
+  const getFilenameFromUrl = (url) => {
+    if (!url || !url.includes(STORAGE_BUCKET)) return null
+    const parts = url.split('/')
+    return parts[parts.length - 1]
+  }
+
+  // Upload image with auto-delete of old one
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image must be less than 2MB')
+      return
+    }
+
+    setUploading(true)
+    setError(null)
+
+    try {
+      // 1. Delete old image if it exists in our storage
+      const oldFilename = getFilenameFromUrl(hero.bannerImage)
+      if (oldFilename) {
+        await supabase.storage
+          .from(STORAGE_BUCKET)
+          .remove([oldFilename])
+      }
+
+      // 2. Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `banner_${Date.now()}.${fileExt}`
+
+      // 3. Upload new image
+      const { data, error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        })
+
+      if (uploadError) throw uploadError
+
+      // 4. Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(fileName)
+
+      // 5. Update hero state with new URL
+      setHero(prev => ({ ...prev, bannerImage: publicUrl }))
+      
+      alert('Image uploaded successfully! Click "Save Hero" to apply changes.')
+    } catch (err) {
+      console.error('Upload error:', err)
+      setError(err.message || 'Failed to upload image. Make sure the storage bucket exists.')
+    } finally {
+      setUploading(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
   // Access denied for non-owners
   if (!isOwner) {
     return (
@@ -201,14 +275,59 @@ function HomepageContent() {
               rows={3}
               placeholder="Join the leading coaching center..."
             />
-            <Input
-              label="Banner Image URL"
-              value={hero.bannerImage}
-              onChange={(e) => setHero(prev => ({ ...prev, bannerImage: e.target.value }))}
-              placeholder="/banner.png"
-            />
+            
+            {/* Image Upload Section */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-gray-700">Banner Image</label>
+              
+              {/* Current Image Preview */}
+              {hero.bannerImage && (
+                <div className="relative w-full max-w-md">
+                  <img 
+                    src={hero.bannerImage} 
+                    alt="Current banner" 
+                    className="w-full h-40 object-cover rounded-lg border border-gray-200"
+                  />
+                  <p className="text-xs text-gray-500 mt-1 truncate">{hero.bannerImage}</p>
+                </div>
+              )}
+              
+              {/* Upload Button */}
+              <div className="flex items-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="banner-upload"
+                />
+                <label
+                  htmlFor="banner-upload"
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-colors
+                    ${uploading 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploading ? 'Uploading...' : 'Upload New Image'}
+                </label>
+                <span className="text-sm text-gray-500">Max 2MB, JPG/PNG</span>
+              </div>
+
+              {/* Or use URL */}
+              <div className="pt-2">
+                <Input
+                  label="Or paste image URL"
+                  value={hero.bannerImage}
+                  onChange={(e) => setHero(prev => ({ ...prev, bannerImage: e.target.value }))}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+
             <div className="flex justify-end">
-              <Button onClick={() => saveSection('hero', hero)} disabled={saving}>
+              <Button onClick={() => saveSection('hero', hero)} disabled={saving || uploading}>
                 <Save className="w-4 h-4" />
                 {saving ? 'Saving...' : 'Save Hero'}
               </Button>
