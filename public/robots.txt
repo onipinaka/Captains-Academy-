@@ -1,0 +1,19 @@
+# Robots.txt for Captains Academy
+# https://captainsacademy.in
+
+User-agent: *
+Allow: /
+
+# Disallow admin/protected routes
+Disallow: /dashboard
+Disallow: /students
+Disallow: /batches
+Disallow: /tests
+Disallow: /fees
+Disallow: /attendance
+Disallow: /analytics
+Disallow: /expenses
+Disallow: /settings
+
+# Sitemap location
+Sitemap: https://captainsacademy.in/sitemap.xml
