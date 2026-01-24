@@ -35,28 +35,14 @@ const defaultContact = {
   email: 'captainsacademybhind@gmail.com'
 }
 
-// Icon mapping for dynamic stats
-const iconMap = {
-  Users, Award, Clock, GraduationCap
-}
-
-const features = [
-  { title: 'Expert Faculty', description: 'Learn from experienced teachers with proven track records', icon: GraduationCap },
-  { title: 'Small Batches', description: 'Personalized attention with limited batch sizes', icon: Users },
-  { title: 'Regular Tests', description: 'Weekly tests to track progress and identify weak areas', icon: BookOpen },
-  { title: 'Study Material', description: 'Comprehensive notes and practice materials provided', icon: CheckCircle },
+const defaultFeatures = [
+  { title: 'Expert Faculty', description: 'Learn from experienced teachers with proven track records' },
+  { title: 'Small Batches', description: 'Personalized attention with limited batch sizes' },
+  { title: 'Regular Tests', description: 'Weekly tests to track progress and identify weak areas' },
+  { title: 'Study Material', description: 'Comprehensive notes and practice materials provided' },
 ]
 
-const courses = [
-  { name: 'Class 10 Board Preparation', duration: '10 months', subjects: ['Math', 'Science', 'English'], fee: '₹2,000/month' },
-  { name: 'Class 12 Science (PCM)', duration: '10 months', subjects: ['Physics', 'Chemistry', 'Math'], fee: '₹2,500/month' },
-  { name: 'Class 12 Science (PCB)', duration: '10 months', subjects: ['Physics', 'Chemistry', 'Biology'], fee: '₹2,500/month' },
-  { name: 'Class 11 Commerce', duration: '10 months', subjects: ['Accounts', 'Economics', 'Math'], fee: '₹2,200/month' },
-  { name: 'JEE Main Crash Course', duration: '3 months', subjects: ['Physics', 'Chemistry', 'Math'], fee: '₹15,000' },
-  { name: 'NEET Crash Course', duration: '3 months', subjects: ['Physics', 'Chemistry', 'Biology'], fee: '₹15,000' },
-]
-
-const results = [
+const defaultResults = [
   { name: 'Priya Sharma', exam: 'Class 12 Boards', score: '98.6%', year: '2024' },
   { name: 'Rahul Verma', exam: 'JEE Main', score: '99.2 percentile', year: '2024' },
   { name: 'Ananya Patel', exam: 'NEET', score: '685/720', year: '2024' },
@@ -65,18 +51,46 @@ const results = [
   { name: 'Arjun Kumar', exam: 'Class 12 Commerce', score: '96.4%', year: '2024' },
 ]
 
-const testimonials = [
-  { name: 'Parent of Priya S.', text: 'The faculty here is exceptional. My daughter improved from 70% to 95% in just 6 months. Highly recommended!', rating: 5 },
-  { name: 'Rahul V., IIT Delhi', text: 'The systematic approach and regular tests helped me score 93% in 12th. The teachers are always available for doubts.', rating: 5 },
-  { name: 'Parent of Arjun K.', text: 'Small batch sizes mean personal attention for each student. Worth every rupee!', rating: 5 },
+const defaultTestimonials = [
+  { name: 'Parent of Priya S.', text: 'The faculty here is exceptional. My daughter improved from 70% to 95% in just 6 months. Highly recommended!' },
+  { name: 'Rahul V., IIT Delhi', text: 'The systematic approach and regular tests helped me score 93% in 12th. The teachers are always available for doubts.' },
+  { name: 'Parent of Arjun K.', text: 'Small batch sizes mean personal attention for each student. Worth every rupee!' },
 ]
 
-const timings = [
+const defaultTimings = [
   { batch: 'Class 10 Morning', days: 'Mon, Wed, Fri', time: '7:00 AM - 9:00 AM' },
   { batch: 'Class 10 Evening', days: 'Mon, Wed, Fri', time: '5:00 PM - 7:00 PM' },
   { batch: 'Class 12 Science', days: 'Tue, Thu, Sat', time: '4:00 PM - 7:00 PM' },
   { batch: 'Class 11 Commerce', days: 'Mon, Wed, Fri', time: '3:00 PM - 5:00 PM' },
   { batch: 'JEE/NEET Weekend', days: 'Sat, Sun', time: '9:00 AM - 1:00 PM' },
+]
+
+const defaultFooter = {
+  description: 'Empowering students with quality education since 2014. Join us and achieve academic excellence.',
+  weekdayHours: 'Mon - Sat: 7:00 AM - 9:00 PM',
+  weekendHours: 'Sunday: 9:00 AM - 1:00 PM'
+}
+
+// Icon mapping for dynamic stats and features
+const iconMap = {
+  Users, Award, Clock, GraduationCap, BookOpen, CheckCircle
+}
+
+// Feature icon mapping
+const featureIconMap = {
+  'Expert Faculty': GraduationCap,
+  'Small Batches': Users,
+  'Regular Tests': BookOpen,
+  'Study Material': CheckCircle
+}
+
+const courses = [
+  { name: 'Class 10 Board Preparation', duration: '10 months', subjects: ['Math', 'Science', 'English'], fee: '₹2,000/month' },
+  { name: 'Class 12 Science (PCM)', duration: '10 months', subjects: ['Physics', 'Chemistry', 'Math'], fee: '₹2,500/month' },
+  { name: 'Class 12 Science (PCB)', duration: '10 months', subjects: ['Physics', 'Chemistry', 'Biology'], fee: '₹2,500/month' },
+  { name: 'Class 11 Commerce', duration: '10 months', subjects: ['Accounts', 'Economics', 'Math'], fee: '₹2,200/month' },
+  { name: 'JEE Main Crash Course', duration: '3 months', subjects: ['Physics', 'Chemistry', 'Math'], fee: '₹15,000' },
+  { name: 'NEET Crash Course', duration: '3 months', subjects: ['Physics', 'Chemistry', 'Biology'], fee: '₹15,000' },
 ]
 
 function Homepage() {
@@ -92,6 +106,11 @@ function Homepage() {
   const [stats, setStats] = useState(defaultStats)
   const [about, setAbout] = useState(defaultAbout)
   const [contact, setContact] = useState(defaultContact)
+  const [features, setFeatures] = useState(defaultFeatures)
+  const [results, setResults] = useState(defaultResults)
+  const [testimonials, setTestimonials] = useState(defaultTestimonials)
+  const [timings, setTimings] = useState(defaultTimings)
+  const [footer, setFooter] = useState(defaultFooter)
 
   // Fetch dynamic content from Supabase
   useEffect(() => {
@@ -119,6 +138,21 @@ function Homepage() {
               break
             case 'contact':
               setContact(prev => ({ ...prev, ...item.content }))
+              break
+            case 'features':
+              setFeatures(item.content)
+              break
+            case 'achievers':
+              setResults(item.content)
+              break
+            case 'testimonials':
+              setTestimonials(item.content)
+              break
+            case 'timings':
+              setTimings(item.content)
+              break
+            case 'footer':
+              setFooter(prev => ({ ...prev, ...item.content }))
               break
           }
         })
@@ -309,15 +343,18 @@ function Homepage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature) => (
-              <div key={feature.title} className="p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-blue-600" />
+            {features.map((feature, index) => {
+              const FeatureIcon = featureIconMap[feature.title] || CheckCircle
+              return (
+                <div key={feature.title || index} className="p-6 bg-gray-50 rounded-2xl hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                    <FeatureIcon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -590,10 +627,10 @@ function Homepage() {
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
                   <GraduationCap className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-xl font-bold text-white">Excellence Coaching</span>
+                <span className="text-xl font-bold text-white">Captains Academy</span>
               </div>
               <p className="text-gray-400 max-w-md">
-                Empowering students with quality education since 2014. Join us and achieve academic excellence.
+                {footer.description}
               </p>
             </div>
             <div>
@@ -608,13 +645,13 @@ function Homepage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Timings</h4>
               <ul className="space-y-2">
-                <li>Mon - Sat: 7:00 AM - 9:00 PM</li>
-                <li>Sunday: 9:00 AM - 1:00 PM</li>
+                <li>{footer.weekdayHours}</li>
+                <li>{footer.weekendHours}</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-            <p>&copy; {new Date().getFullYear()} Excellence Coaching Center. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Captains Academy. All rights reserved.</p>
           </div>
         </div>
       </footer>
